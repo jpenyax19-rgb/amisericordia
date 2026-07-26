@@ -1,0 +1,6 @@
+streamlit 
+pandas
+libsql_client
+plotly
+cloudinary
+streamlit_js
