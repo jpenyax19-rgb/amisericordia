@@ -1,6 +1,8 @@
-streamlit 
-pandas
-libsql_client
-plotly
-cloudinary
-streamlit_js
+streamlit==1.55.0
+streamlit-antd-components==0.3.2
+streamlit-echarts==0.4.0
+streamlit-js-eval==1.0.0
+pandas==2.3.3
+libsql-client==0.3.1
+cloudinary==1.45.0
+
