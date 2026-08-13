@@ -54,9 +54,13 @@ def draw_pie_chart(df, names_col, values_col, title):
 # FUNCIONES HELPER PARA FORMATO DE FECHA Y BADGES
 # ---------------------------------------------------------
 MONTHS_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-def format_date_str(date_val) -> str:
-    """Convierte cualquier fecha dada a formato dd-mmm-YYYY (ej. 24-Jun-2026)."""
+def format_date_str(date_val, lang: str = "es") -> str:
+    """Convierte cualquier fecha al formato localizado.
+    ES: dd/mmm/YYYY  (ej. 24/Jun/2026)
+    EN: mmm dd, YYYY (ej. Jun 24, 2026)
+    """
     if not date_val or pd.isna(date_val):
         return "N/A"
     
@@ -72,8 +76,32 @@ def format_date_str(date_val) -> str:
             except Exception:
                 return s
 
-    month_abbr = MONTHS_ES[d.month - 1]
-    return f"{d.day:02d}-{month_abbr}-{d.year}"
+    if lang == "en":
+        month_abbr = MONTHS_EN[d.month - 1]
+        return f"{month_abbr} {d.day:02d}, {d.year}"
+    else:
+        month_abbr = MONTHS_ES[d.month - 1]
+        return f"{d.day:02d}/{month_abbr}/{d.year}"
+
+def format_date_range(desde_val, hasta_val, lang: str = "es") -> str:
+    """Formatea un rango de fechas con localización.
+    Si son iguales retorna la fecha formateada.
+    ES: 'Del {desde} al {hasta}'
+    EN: 'From {desde} to {hasta}'
+    """
+    if not desde_val or pd.isna(desde_val):
+        return format_date_str(hasta_val, lang)
+    if not hasta_val or pd.isna(hasta_val):
+        return format_date_str(desde_val, lang)
+    
+    desde_str = format_date_str(desde_val, lang)
+    hasta_str = format_date_str(hasta_val, lang)
+    
+    if desde_str == hasta_str:
+        return desde_str
+    if lang == "en":
+        return f"From {desde_str} to {hasta_str}"
+    return f"Del {desde_str} al {hasta_str}"
 
 def parse_delimited_list(text_str: str) -> list:
     """Extrae una lista de elementos reconociendo separadores (, ; .)."""
@@ -360,7 +388,8 @@ TEXTS = {
         "form_title": "📝 Registrar Nueva Actividad",
         "field_reportero": "Reportero / Usuario",
         "field_actividad": "Nombre de la Actividad",
-        "field_fecha": "Fecha",
+        "field_fecha_desde": "Fecha Desde",
+        "field_fecha_hasta": "Fecha Hasta",
         "field_lugar": "Lugar / Ciudad",
         "field_ubicacion": "Ubicación / Coordenadas / Dirección",
         "field_pastores": "Pastores a Cargo",
@@ -458,7 +487,8 @@ TEXTS = {
         "form_title": "📝 Register New Activity",
         "field_reportero": "Reporter / User",
         "field_actividad": "Activity Name",
-        "field_fecha": "Date",
+        "field_fecha_desde": "Start Date",
+        "field_fecha_hasta": "End Date",
         "field_lugar": "Location / City",
         "field_ubicacion": "GPS / Address",
         "field_pastores": "Lead Pastors",
@@ -723,7 +753,7 @@ if current_nav == t["nav_muestra"]:
 
     # TAB RESULTADOS CONSOLIDADOS
     with tab_resultados:
-        df_act = fetch_data("SELECT * FROM actividades WHERE estado = 'aprobado' ORDER BY fecha DESC")
+        df_act = fetch_data("SELECT * FROM actividades WHERE estado = 'aprobado' ORDER BY fecha_desde DESC")
 
         subtab1, subtab2, subtab3, subtab4 = st.tabs([
             t["subtab_alcance"],
@@ -893,11 +923,18 @@ if current_nav == t["nav_muestra"]:
                     media_urls = parse_media_urls(row.get("videos_audios_url"), only_approved=True)
 
                     if row.get("testimonios_texto") or row.get("descripcion") or foto_urls or media_urls:
-                        formatted_fecha = format_date_str(row.get('fecha'))
+                        _lang = st.session_state.get("lang", "es")
+                        formatted_fecha = format_date_range(row.get('fecha_desde'), row.get('fecha_hasta'), _lang)
                         with st.expander(f"📌 {row.get('nombre_actividad', 'Actividad')} - {row.get('lugar', '')} ({formatted_fecha})", expanded=True):
                             # Información básica de la Actividad
                             st.markdown(f"**Actividad :** {row.get('nombre_actividad', 'N/A')}")
-                            st.markdown(f"**Fecha :** `{formatted_fecha}`")
+                            # Mostrar fechas: si son iguales -> una sola Fecha, si difieren -> Fecha Desde y Fecha Hasta
+                            fd = format_date_str(row.get('fecha_desde'), _lang)
+                            fh = format_date_str(row.get('fecha_hasta'), _lang)
+                            if fd == fh:
+                                st.markdown(f"**Fecha :** `{fd}`")
+                            else:
+                                st.markdown(f"**Fecha Desde :** `{fd}` &nbsp;&nbsp; **Fecha Hasta :** `{fh}`")
                             st.markdown(f"**Lugar :** {row.get('lugar', 'N/A')}")
                             
                             # Renderizado de Badges para Pastores a Cargo
@@ -1003,8 +1040,11 @@ if current_nav == t["nav_muestra"]:
             st.subheader("📋 Consolidado de Actividades Registradas (Turso DB)")
             if not df_act.empty:
                 df_display = df_act.copy()
-                if "fecha" in df_display.columns:
-                    df_display["fecha"] = df_display["fecha"].apply(format_date_str)
+                _lang = st.session_state.get("lang", "es")
+                if "fecha_desde" in df_display.columns:
+                    df_display["fecha_desde"] = df_display["fecha_desde"].apply(lambda v: format_date_str(v, _lang))
+                if "fecha_hasta" in df_display.columns:
+                    df_display["fecha_hasta"] = df_display["fecha_hasta"].apply(lambda v: format_date_str(v, _lang))
 
                 st.dataframe(df_display, use_container_width=True)
 
@@ -1072,7 +1112,8 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
         with col_f1:
             reportero_input = st.text_input(t["field_reportero"], value=u["nombre_completo"], disabled=(u["rol"] == "reportero"))
             nombre_actividad = st.text_input(t["field_actividad"], placeholder="Ej: Jornada de Alimentación y Consejería")
-            fecha_actividad = st.date_input(t["field_fecha"], value=datetime.date.today())
+            fecha_desde = st.date_input(t["field_fecha_desde"], value=datetime.date.today())
+            fecha_hasta = st.date_input(t["field_fecha_hasta"], value=fecha_desde)
             lugar_actividad = st.text_input(t["field_lugar"], placeholder="Ej: La Guaira, Sector Naiguatá")
             ubicacion_actividad = st.text_input(
                 t["field_ubicacion"],
@@ -1137,7 +1178,7 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
         submitted = st.form_submit_button(t["save_btn"], use_container_width=True)
 
         if submitted:
-            folder_name = f"pmis2026/{sanitize_folder_name(nombre_actividad)}_{fecha_actividad}"
+            folder_name = f"pmis2026/{sanitize_folder_name(nombre_actividad)}_{fecha_desde}"
             is_auto_approved = (u["rol"] in ["editor", "admin"])
 
             # Subida de fotos
@@ -1179,15 +1220,15 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
 
             query_insert = """
             INSERT INTO actividades (
-                reportero, nombre_actividad, fecha, lugar, ubicacion, pastores_cargo, descripcion,
+                reportero, nombre_actividad, fecha_desde, fecha_hasta, lugar, ubicacion, pastores_cargo, descripcion,
                 fotos_url, videos_audios_url, conversiones, personas_discipulado, adultos_atendidos,
                 ninos_atendidos, familias_atendidas, tipos_atencion, sectores_municipios, ayudas_entregadas,
                 iglesias_participantes, denominaciones, pastores_lideres_involucrados, familias_creyentes_preparacion,
                 testimonios_texto, otro, estado
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aprobado');
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aprobado');
             """
             params = [
-                reportero_input, nombre_actividad, str(fecha_actividad), lugar_actividad, ubicacion_actividad, pastores_cargo, descripcion,
+                reportero_input, nombre_actividad, str(fecha_desde), str(fecha_hasta), lugar_actividad, ubicacion_actividad, pastores_cargo, descripcion,
                 final_fotos_json, final_media_json, int(num_conversiones), int(num_discipulado), int(num_adultos),
                 int(num_ninos), int(num_familias), tipos_atencion_str, sectores, ayudas,
                 int(num_iglesias), denominaciones_input, int(num_pastores), int(num_voluntarios),
@@ -1211,14 +1252,17 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
 
     if not df_all.empty:
         df_all_disp = df_all.copy()
-        if "fecha" in df_all_disp.columns:
-            df_all_disp["fecha"] = df_all_disp["fecha"].apply(format_date_str)
+        _lang = st.session_state.get("lang", "es")
+        if "fecha_desde" in df_all_disp.columns:
+            df_all_disp["fecha_desde"] = df_all_disp["fecha_desde"].apply(lambda v: format_date_str(v, _lang))
+        if "fecha_hasta" in df_all_disp.columns:
+            df_all_disp["fecha_hasta"] = df_all_disp["fecha_hasta"].apply(lambda v: format_date_str(v, _lang))
         st.dataframe(df_all_disp, use_container_width=True)
         
         st.markdown("---")
         st.markdown("### ⚙️ Modificación Completa y Edición de Testimonios / Actividades")
         
-        act_options = [f"ID #{row['id']} - {row['nombre_actividad']} ({format_date_str(row['fecha'])} | {row['lugar']})" for _, row in df_all.iterrows()]
+        act_options = [f"ID #{row['id']} - {row['nombre_actividad']} ({format_date_range(row.get('fecha_desde'), row.get('fecha_hasta'), st.session_state.get('lang', 'es'))} | {row['lugar']})" for _, row in df_all.iterrows()]
         act_ids = df_all["id"].tolist()
         
         sel_idx = st.selectbox(
@@ -1247,13 +1291,19 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                     e_nombre = st.text_input(t["field_actividad"], value=str(row_sel.get("nombre_actividad", "")))
                     
                     # Formatear fecha
-                    raw_fecha = str(row_sel.get("fecha", ""))
+                    raw_fecha_desde = str(row_sel.get("fecha_desde", ""))
+                    raw_fecha_hasta = str(row_sel.get("fecha_hasta", ""))
                     try:
-                        parsed_date = datetime.datetime.strptime(raw_fecha, "%Y-%m-%d").date()
+                        parsed_date_desde = datetime.datetime.strptime(raw_fecha_desde, "%Y-%m-%d").date()
                     except Exception:
-                        parsed_date = datetime.date.today()
+                        parsed_date_desde = datetime.date.today()
+                    try:
+                        parsed_date_hasta = datetime.datetime.strptime(raw_fecha_hasta, "%Y-%m-%d").date()
+                    except Exception:
+                        parsed_date_hasta = parsed_date_desde
                     
-                    e_fecha = st.date_input(t["field_fecha"], value=parsed_date)
+                    e_fecha_desde = st.date_input(t["field_fecha_desde"], value=parsed_date_desde)
+                    e_fecha_hasta = st.date_input(t["field_fecha_hasta"], value=parsed_date_hasta)
                     e_lugar = st.text_input(t["field_lugar"], value=str(row_sel.get("lugar", "")))
                     e_ubicacion = st.text_input(t["field_ubicacion"], value=str(row_sel.get("ubicacion", "")))
 
@@ -1312,7 +1362,8 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                     UPDATE actividades SET
                         reportero = ?,
                         nombre_actividad = ?,
-                        fecha = ?,
+                        fecha_desde = ?,
+                        fecha_hasta = ?,
                         lugar = ?,
                         ubicacion = ?,
                         pastores_cargo = ?,
@@ -1335,7 +1386,7 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                     WHERE id = ?;
                     """
                     params_update = [
-                        e_reportero, e_nombre, str(e_fecha), e_lugar, e_ubicacion, e_pastores, e_desc,
+                        e_reportero, e_nombre, str(e_fecha_desde), str(e_fecha_hasta), e_lugar, e_ubicacion, e_pastores, e_desc,
                         int(e_conversiones), int(e_discipulado), int(e_adultos), int(e_ninos), int(e_familias),
                         atencion_str, e_sectores, e_ayudas,
                         int(e_iglesias), e_denominaciones, int(e_pastores_num), int(e_voluntarios),
