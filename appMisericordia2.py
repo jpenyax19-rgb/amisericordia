@@ -3,6 +3,7 @@ import asyncio
 import hashlib
 import json
 import pandas as pd
+
 import datetime
 import libsql_client as libsql
 import re
@@ -418,6 +419,20 @@ TEXTS = {
         "edit_activity_title": "✏️ Editar Información y Contenido del Testimonio / Actividad",
         "save_edits_btn": "💾 Guardar Todos los Cambios del Testimonio",
         "edit_success": "¡Testimonio / Actividad actualizado con éxito en la base de datos!",
+
+        # Editor / Approval & Full Edit
+        "media_approval_title": "📸/🎬 Aprobación Individual de Fotos y Videos",
+        "approve_all": "✅ Aprobar Todos",
+        "disapprove_all": "❌ Desaprobar Todos",
+        "save_media_status": "💾 Guardar Aprobación de Multimedia",
+        "media_updated_success": "¡Aprobación de fotos y videos actualizada correctamente!",
+        "edit_activity_title": "✏️ Editar Información y Contenido del Testimonio / Actividad",
+        "save_edits_btn": "💾 Guardar Todos los Cambios del Testimonio",
+        "edit_success": "¡Testimonio / Actividad actualizado con éxito en la base de datos!",
+        "upload_new_media_title": "📤 Subir Nuevos Archivos Multimedia",
+        "upload_new_media_btn": "📤 Subir y Agregar Multimedia a esta Actividad",
+        "upload_new_media_success": "¡Nuevos archivos multimedia subidos y agregados exitosamente!",
+
     },
     "en": {
         "title": "🕊️ Mercy Project - Venezuela",
@@ -517,6 +532,20 @@ TEXTS = {
         "edit_activity_title": "✏️ Edit Testimony / Activity Information & Content",
         "save_edits_btn": "💾 Save All Testimony Changes",
         "edit_success": "Testimony / Activity updated successfully in database!",
+
+        # Editor / Approval & Full Edit
+        "media_approval_title": "📸/🎬 Individual Photo and Video Approval",
+        "approve_all": "✅ Approve All",
+        "disapprove_all": "❌ Reject All",
+        "save_media_status": "💾 Save Media Approval Status",
+        "media_updated_success": "Photo & video approval status updated successfully!",
+        "edit_activity_title": "✏️ Edit Testimony / Activity Information & Content",
+        "save_edits_btn": "💾 Save All Testimony Changes",
+        "edit_success": "Testimony / Activity updated successfully in database!",
+        "upload_new_media_title": "📤 Upload New Media Files",
+        "upload_new_media_btn": "📤 Upload & Add Media to this Activity",
+        "upload_new_media_success": "New media files uploaded and added successfully!",
+    
     }
 }
 
@@ -1400,6 +1429,7 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                         st.error("Error al guardar las modificaciones en la base de datos.")
 
         # TAB 2: APROBACIÓN / EDICIÓN MULTIMEDIA
+        #
         with tab_edit_media:
             st.subheader(t["media_approval_title"])
             st.caption(f"Gestión de visibilidad pública de archivos multimedia para la Actividad #{sel_id}: **{row_sel['nombre_actividad']}**")
@@ -1473,6 +1503,87 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                     execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [str_fotos, str_media, sel_id])
                     st.success(t["media_updated_success"])
                     st.rerun()
+
+            st.markdown("---")
+            st.markdown(f"### {t['upload_new_media_title']}")
+            st.caption("💡 Carga nuevos archivos directos o enlaces externos (fotos, videos, audios) para añadirlos a esta actividad.")
+
+            with st.form(key=f"form_upload_extra_media_{sel_id}"):
+                col_m1_edit, col_m2_edit = st.columns(2)
+                with col_m1_edit:
+                    st.write("**🖼️ Agregar Fotos** (múltiples)")
+                    new_files_fotos = st.file_uploader(
+                        t["upload_direct"] + " (Fotos)",
+                        type=["png", "jpg", "jpeg", "webp"],
+                        accept_multiple_files=True,
+                        key=f"edit_uploader_fotos_{sel_id}"
+                    )
+                    new_url_fotos_ext = st.text_input(t["url_external"] + " (Fotos)", key=f"edit_url_fotos_{sel_id}")
+
+                with col_m2_edit:
+                    st.write("**🎬 Agregar Videos / Audios** (múltiples)")
+                    new_files_media = st.file_uploader(
+                        t["upload_direct"] + " (Video/Audio)",
+                        type=["mp4", "mp3", "wav", "mov", "m4a", "ogg", "webm"],
+                        accept_multiple_files=True,
+                        key=f"edit_uploader_media_{sel_id}"
+                    )
+                    new_url_media_ext = st.text_input(t["url_external"] + " (Videos/Audios)", key=f"edit_url_media_{sel_id}")
+
+                auto_approve_new = st.checkbox("✅ Aprobar automáticamente los nuevos archivos subidos", value=True, key=f"chk_auto_app_{sel_id}")
+
+                btn_upload_extra = st.form_submit_button(t["upload_new_media_btn"], use_container_width=True)
+
+                if btn_upload_extra:
+                    act_fecha = row_sel.get('fecha_desde') or row_sel.get('fecha') or ''
+                    folder_name = f"pmis2026/{sanitize_folder_name(str(row_sel['nombre_actividad']))}_{act_fecha}"
+                    added_count = 0
+
+                    # Cargar fotos adicionales a Cloudinary
+                    if IS_CLOUDINARY_READY and new_files_fotos:
+                        prog_f = st.progress(0, text="Subiendo nuevas fotos...")
+                        for i, f in enumerate(new_files_fotos):
+                            url = upload_media_file(f, folder=folder_name)
+                            if url:
+                                list_fotos.append({"url": url, "aprobado": auto_approve_new})
+                                added_count += 1
+                            prog_f.progress((i + 1) / len(new_files_fotos), text=f"Foto {i+1}/{len(new_files_fotos)} subida...")
+                        prog_f.empty()
+                    elif new_files_fotos and not IS_CLOUDINARY_READY:
+                        st.warning("⚠️ Cloudinary no está configurado. Las fotos no se subieron.")
+
+                    if new_url_fotos_ext.strip():
+                        list_fotos.append({"url": new_url_fotos_ext.strip(), "aprobado": auto_approve_new})
+                        added_count += 1
+
+                    # Cargar videos/audios adicionales a Cloudinary
+                    if IS_CLOUDINARY_READY and new_files_media:
+                        prog_m = st.progress(0, text="Subiendo nuevos videos/audios...")
+                        for i, f in enumerate(new_files_media):
+                            url = upload_media_file(f, folder=folder_name)
+                            if url:
+                                list_media.append({"url": url, "aprobado": auto_approve_new})
+                                added_count += 1
+                            prog_m.progress((i + 1) / len(new_files_media), text=f"Archivo {i+1}/{len(new_files_media)} subido...")
+                        prog_m.empty()
+                    elif new_files_media and not IS_CLOUDINARY_READY:
+                        st.warning("⚠️ Cloudinary no está configurado. Los videos/audios no se subieron.")
+
+                    if new_url_media_ext.strip():
+                        list_media.append({"url": new_url_media_ext.strip(), "aprobado": auto_approve_new})
+                        added_count += 1
+
+                    if added_count > 0:
+                        execute_query(
+                            "UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?",
+                            [json.dumps(list_fotos), json.dumps(list_media), sel_id]
+                        )
+                        st.success(f"{t['upload_new_media_success']} ({added_count} elemento(s) agregado(s))")
+                        st.rerun()
+                    else:
+                        st.warning("No se seleccionó ningún archivo ni se ingresó ninguna URL.")
+
+        
 
         # TAB 3: ESTADO RÁPIDO Y ELIMINACIÓN
         with tab_danger:
