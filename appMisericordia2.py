@@ -16,7 +16,7 @@ try:
 except ImportError:
     HAS_PLOTLY = False
 
-# Intentar importar Cloudinary para carga directa
+# Intentar importar Cloudinary para carga directa y eliminación
 try:
     import cloudinary
     import cloudinary.uploader
@@ -85,11 +85,7 @@ def format_date_str(date_val, lang: str = "es") -> str:
         return f"{d.day:02d}/{month_abbr}/{d.year}"
 
 def format_date_range(desde_val, hasta_val, lang: str = "es") -> str:
-    """Formatea un rango de fechas con localización.
-    Si son iguales retorna la fecha formateada.
-    ES: 'Del {desde} al {hasta}'
-    EN: 'From {desde} to {hasta}'
-    """
+    """Formatea un rango de fechas con localización."""
     if not desde_val or pd.isna(desde_val):
         return format_date_str(hasta_val, lang)
     if not hasta_val or pd.isna(hasta_val):
@@ -157,7 +153,7 @@ def render_pastores_badges(pastores_str: str) -> str:
     return " ".join(badges_html)
 
 def render_ayudas_badges(ayudas_str: str) -> str:
-    """Genera HTML con badges de distintos colores para cada ayuda entregada, separando por coma, punto y coma, o punto."""
+    """Genera HTML con badges de distintos colores para cada ayuda entregada."""
     items = parse_delimited_list(ayudas_str)
     if not items:
         return "<span style='color:#94A3B8;'>N/A</span>"
@@ -181,10 +177,7 @@ def render_ayudas_badges(ayudas_str: str) -> str:
     return " ".join(badges_html)
 
 def extract_lat_lon(location_str: str):
-    """
-    Extrae valores numéricos de latitud y longitud desde una cadena de texto.
-    Ejemplos de entrada: "10.480612, -66.903581", "Lat: 10.48, Lon: -66.90"
-    """
+    """Extrae valores numéricos de latitud y longitud desde una cadena de texto."""
     if not location_str or pd.isna(location_str):
         return None, None
     s = str(location_str).strip()
@@ -200,10 +193,7 @@ def extract_lat_lon(location_str: str):
     return None, None
 
 def render_location_map(location_str: str, title: str = "Ubicación Geográfica"):
-    """
-    Muestra un mapa interactivo de Streamlit (st.map) y un enlace a Google Maps si existen coordenadas.
-    Si solo hay una dirección de texto, muestra un botón directo para buscarla en Google Maps.
-    """
+    """Muestra un mapa interactivo de Streamlit (st.map) y enlace a Google Maps."""
     lat, lon = extract_lat_lon(location_str)
     if lat is not None and lon is not None:
         st.markdown(f"**📍 {title} (`{lat:.5f}, {lon:.5f}`):**")
@@ -227,7 +217,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# ESTILOS CSS PERSONALIZADOS (Aesthetic Premium)
+# ESTILOS CSS PERSONALIZADOS
 # ---------------------------------------------------------
 CUSTOM_CSS = """
 <style>
@@ -237,7 +227,6 @@ CUSTOM_CSS = """
         font-family: 'Inter', sans-serif;
     }
     
-    /* Header Principal */
     .header-box {
         background: linear-gradient(135deg, #1E293B 0%, #0F172A 50%, #1E1B4B 100%);
         padding: 2.5rem;
@@ -259,7 +248,6 @@ CUSTOM_CSS = """
         margin-bottom: 0;
     }
 
-    /* Cards KPI */
     .kpi-card {
         background: #1E293B !important;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -289,7 +277,6 @@ CUSTOM_CSS = """
         margin-top: 4px;
     }
 
-    /* Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
     }
@@ -300,7 +287,6 @@ CUSTOM_CSS = """
         padding: 0 20px;
     }
 
-    /* Cards de Testimonios y Antecedentes */
     .info-card {
         background: #1E293B !important;
         border-left: 4px solid #6366F1;
@@ -410,29 +396,21 @@ TEXTS = {
         "save_error": "Error al guardar la actividad: ",
         "export_csv": "📥 Exportar a CSV",
 
-        # Editor / Edición completa de Testimonios
-        "media_approval_title": "📸/🎬 Aprobación Individual de Fotos y Videos",
-        "approve_all": "✅ Aprobar Todos",
-        "disapprove_all": "❌ Desaprobar Todos",
-        "save_media_status": "💾 Guardar Aprobación de Multimedia",
-        "media_updated_success": "¡Aprobación de fotos y videos actualizada correctamente!",
-        "edit_activity_title": "✏️ Editar Información y Contenido del Testimonio / Actividad",
-        "save_edits_btn": "💾 Guardar Todos los Cambios del Testimonio",
-        "edit_success": "¡Testimonio / Actividad actualizado con éxito en la base de datos!",
-
         # Editor / Approval & Full Edit
         "media_approval_title": "📸/🎬 Aprobación Individual de Fotos y Videos",
         "approve_all": "✅ Aprobar Todos",
         "disapprove_all": "❌ Desaprobar Todos",
         "save_media_status": "💾 Guardar Aprobación de Multimedia",
         "media_updated_success": "¡Aprobación de fotos y videos actualizada correctamente!",
-        "edit_activity_title": "✏️ Editar Información y Contenido del Testimonio / Actividad",
+        "edit_activity_title": "✏️ Edición de Actividades",
         "save_edits_btn": "💾 Guardar Todos los Cambios del Testimonio",
         "edit_success": "¡Testimonio / Actividad actualizado con éxito en la base de datos!",
         "upload_new_media_title": "📤 Subir Nuevos Archivos Multimedia",
         "upload_new_media_btn": "📤 Subir y Agregar Multimedia a esta Actividad",
         "upload_new_media_success": "¡Nuevos archivos multimedia subidos y agregados exitosamente!",
-
+        "delete_media_title": "🗑️ Eliminar Multimedia No Aprobado",
+        "delete_media_btn": "🗑️ Eliminar Archivos Seleccionados (Cloudinary y BD)",
+        "dataframe_title": "📋 Dataframe de Actividades",
     },
     "en": {
         "title": "🕊️ Mercy Project - Venezuela",
@@ -529,23 +507,15 @@ TEXTS = {
         "disapprove_all": "❌ Reject All",
         "save_media_status": "💾 Save Media Approval Status",
         "media_updated_success": "Photo & video approval status updated successfully!",
-        "edit_activity_title": "✏️ Edit Testimony / Activity Information & Content",
-        "save_edits_btn": "💾 Save All Testimony Changes",
-        "edit_success": "Testimony / Activity updated successfully in database!",
-
-        # Editor / Approval & Full Edit
-        "media_approval_title": "📸/🎬 Individual Photo and Video Approval",
-        "approve_all": "✅ Approve All",
-        "disapprove_all": "❌ Reject All",
-        "save_media_status": "💾 Save Media Approval Status",
-        "media_updated_success": "Photo & video approval status updated successfully!",
-        "edit_activity_title": "✏️ Edit Testimony / Activity Information & Content",
+        "edit_activity_title": "✏️ Activity Editing",
         "save_edits_btn": "💾 Save All Testimony Changes",
         "edit_success": "Testimony / Activity updated successfully in database!",
         "upload_new_media_title": "📤 Upload New Media Files",
         "upload_new_media_btn": "📤 Upload & Add Media to this Activity",
         "upload_new_media_success": "New media files uploaded and added successfully!",
-    
+        "delete_media_title": "🗑️ Delete Unapproved Media",
+        "delete_media_btn": "🗑️ Delete Selected Files (Cloudinary & DB)",
+        "dataframe_title": "📋 Activities Dataframe",
     }
 }
 
@@ -667,6 +637,22 @@ def upload_media_file(uploaded_file, folder: str = None):
         st.error(f"Error al subir a Cloudinary: {e}")
         return None
 
+def delete_cloudinary_media(url: str) -> bool:
+    """Elimina un archivo alojado en Cloudinary utilizando su URL pública."""
+    if not IS_CLOUDINARY_READY or not url or "cloudinary.com" not in url:
+        return False
+    try:
+        # Capturar el tipo de recurso (image, video, raw) y el public_id (incluyendo subcarpetas)
+        match = re.search(r'/(image|video|raw)/upload/(?:v\d+/)?(.+?)(?:\.[a-zA-Z0-9]+)?$', url)
+        if match:
+            res_type = match.group(1)
+            public_id = match.group(2)
+            res = cloudinary.uploader.destroy(public_id, resource_type=res_type)
+            return res.get("result") in ["ok", "not_found"]
+    except Exception as e:
+        st.error(f"Error al intentar borrar el archivo en Cloudinary ({url}): {e}")
+    return False
+
 # Verificar usuario para login
 def verify_login(username, password):
     pass_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -768,7 +754,6 @@ if current_nav == t["nav_muestra"]:
         </div>
         """, unsafe_allow_html=True)
 
-        # Gráfico rápido de impacto de víctimas por región
         data_sismo = pd.DataFrame({
             "Región": ["La Guaira", "Caracas (Distrito Capital)", "Yaracuy (Epicentro)", "Miranda", "Aragua", "Carabobo", "Falcón"],
             "Gravedad Daño Estructural": [95, 88, 85, 78, 70, 65, 60]
@@ -791,7 +776,7 @@ if current_nav == t["nav_muestra"]:
             t["subtab_tabla"]
         ])
 
-        # SUBTAB 1: ALCANCE (MÉTRICAS EXPANDIDAS)
+        # SUBTAB 1: ALCANCE
         with subtab1:
             tot_actividades = len(df_act)
             tot_adultos = int(df_act["adultos_atendidos"].sum()) if not df_act.empty and "adultos_atendidos" in df_act.columns else 0
@@ -801,7 +786,6 @@ if current_nav == t["nav_muestra"]:
             tot_conversiones = int(df_act["conversiones"].sum()) if not df_act.empty and "conversiones" in df_act.columns else 0
             tot_discipulado = int(df_act["personas_discipulado"].sum()) if not df_act.empty and "personas_discipulado" in df_act.columns else 0
 
-            # Conteo de sectores / municipios únicos
             sectores_set = set()
             if not df_act.empty and "sectores_municipios" in df_act.columns:
                 for item in df_act["sectores_municipios"].dropna():
@@ -809,14 +793,12 @@ if current_nav == t["nav_muestra"]:
                     sectores_set.update(parts)
             tot_sectores = len(sectores_set)
 
-            # Tarjetas KPI Fila 1: General & Demografía Directa
             col1, col2, col3, col4 = st.columns(4)
             col1.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_personas:,}</div><div class="kpi-title">{t["kpi_total_personas"]}</div></div>', unsafe_allow_html=True)
             col2.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_adultos:,}</div><div class="kpi-title">{t["kpi_adultos"]}</div></div>', unsafe_allow_html=True)
             col3.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_ninos:,}</div><div class="kpi-title">{t["kpi_ninos"]}</div></div>', unsafe_allow_html=True)
             col4.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_familias:,}</div><div class="kpi-title">{t["kpi_familias"]}</div></div>', unsafe_allow_html=True)
 
-            # Tarjetas KPI Fila 2: Impacto Espiritual, Jornadas y Cobertura
             col5, col6, col7, col8 = st.columns(4)
             col5.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_conversiones:,}</div><div class="kpi-title">{t["kpi_conversiones"]}</div></div>', unsafe_allow_html=True)
             col6.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_discipulado:,}</div><div class="kpi-title">{t["kpi_discipulado"]}</div></div>', unsafe_allow_html=True)
@@ -825,7 +807,6 @@ if current_nav == t["nav_muestra"]:
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # Mapa Consolidado de Actividades
             map_data = []
             if not df_act.empty and "ubicacion" in df_act.columns:
                 for _, r in df_act.iterrows():
@@ -844,7 +825,6 @@ if current_nav == t["nav_muestra"]:
                 st.map(df_map, zoom=6)
                 st.markdown("<br>", unsafe_allow_html=True)
 
-            # Gráficos de Alcance
             col_chart1, col_chart2 = st.columns(2)
             with col_chart1:
                 df_pob = pd.DataFrame({
@@ -854,7 +834,6 @@ if current_nav == t["nav_muestra"]:
                 draw_pie_chart(df_pob, "Categoría", "Total", "Proporción Demográfica Atendida (Adultos vs. Niños)")
 
             with col_chart2:
-                # Conteo de tipos de atención
                 atencion_counts = {}
                 if not df_act.empty and "tipos_atencion" in df_act.columns:
                     for item in df_act["tipos_atencion"].dropna():
@@ -868,7 +847,6 @@ if current_nav == t["nav_muestra"]:
                 else:
                     st.info("No hay datos registrados aún sobre tipos de atención.")
 
-            # Resumen de Ayudas Entregadas y Cobertura Geográfica
             st.markdown("---")
             st.markdown(f"### {t['ayudas_resumen_title']}")
             if not df_act.empty and "ayudas_entregadas" in df_act.columns:
@@ -883,14 +861,13 @@ if current_nav == t["nav_muestra"]:
                 st.markdown("<br>**Sectores y Municipios Cubiertos:**", unsafe_allow_html=True)
                 st.write(", ".join(sorted(list(sectores_set))))
 
-        # SUBTAB 2: PARTICIPACIÓN (MÉTRICAS EXPANDIDAS)
+        # SUBTAB 2: PARTICIPACIÓN
         with subtab2:
             tot_iglesias = int(df_act["iglesias_participantes"].sum()) if not df_act.empty and "iglesias_participantes" in df_act.columns else 0
             tot_pastores = int(df_act["pastores_lideres_involucrados"].sum()) if not df_act.empty and "pastores_lideres_involucrados" in df_act.columns else 0
             tot_voluntarios = int(df_act["familias_creyentes_preparacion"].sum()) if not df_act.empty and "familias_creyentes_preparacion" in df_act.columns else 0
             tot_fuerza = tot_pastores + tot_voluntarios
 
-            # Denominaciones únicas
             denoms_set = set()
             if not df_act.empty and "denominaciones" in df_act.columns:
                 for item in df_act["denominaciones"].dropna():
@@ -898,20 +875,17 @@ if current_nav == t["nav_muestra"]:
                     denoms_set.update(parts)
             tot_denominaciones = len(denoms_set)
 
-            # Promedios
             prom_vol_act = round(tot_fuerza / len(df_act), 1) if not df_act.empty and len(df_act) > 0 else 0.0
             tot_personas_gen = (int(df_act["adultos_atendidos"].sum()) if not df_act.empty and "adultos_atendidos" in df_act.columns else 0) + \
                                (int(df_act["ninos_atendidos"].sum()) if not df_act.empty and "ninos_atendidos" in df_act.columns else 0)
             prom_pers_iglesia = round(tot_personas_gen / tot_iglesias, 1) if tot_iglesias > 0 else 0.0
 
-            # Tarjetas KPI Fila 1: Convocatoria e Iglesias
             pcol1, pcol2, pcol3, pcol4 = st.columns(4)
             pcol1.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_iglesias:,}</div><div class="kpi-title">{t["kpi_iglesias"]}</div></div>', unsafe_allow_html=True)
             pcol2.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_pastores:,}</div><div class="kpi-title">{t["kpi_pastores"]}</div></div>', unsafe_allow_html=True)
             pcol3.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_voluntarios:,}</div><div class="kpi-title">{t["kpi_voluntarios"]}</div></div>', unsafe_allow_html=True)
             pcol4.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_fuerza:,}</div><div class="kpi-title">{t["kpi_fuerza_voluntaria"]}</div></div>', unsafe_allow_html=True)
 
-            # Tarjetas KPI Fila 2: Denominaciones y Promedios de Desempeño
             pcol5, pcol6, pcol7 = st.columns(3)
             pcol5.markdown(f'<div class="kpi-card"><div class="kpi-val">{tot_denominaciones}</div><div class="kpi-title">{t["kpi_denominaciones_num"]}</div></div>', unsafe_allow_html=True)
             pcol6.markdown(f'<div class="kpi-card"><div class="kpi-val">{prom_vol_act}</div><div class="kpi-title">{t["kpi_prom_voluntarios_act"]}</div></div>', unsafe_allow_html=True)
@@ -919,7 +893,6 @@ if current_nav == t["nav_muestra"]:
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # Gráficos de Participación
             col_part_g1, col_part_g2 = st.columns(2)
             with col_part_g1:
                 df_fuerza = pd.DataFrame({
@@ -947,7 +920,6 @@ if current_nav == t["nav_muestra"]:
             st.subheader("💬 Testimonios e Historias de Vida")
             if not df_act.empty:
                 for idx, row in df_act.iterrows():
-                    # Filtrar sólo fotos y videos aprobados por el Editor
                     foto_urls = parse_media_urls(row.get("fotos_url"), only_approved=True)
                     media_urls = parse_media_urls(row.get("videos_audios_url"), only_approved=True)
 
@@ -955,9 +927,7 @@ if current_nav == t["nav_muestra"]:
                         _lang = st.session_state.get("lang", "es")
                         formatted_fecha = format_date_range(row.get('fecha_desde'), row.get('fecha_hasta'), _lang)
                         with st.expander(f"📌 {row.get('nombre_actividad', 'Actividad')} - {row.get('lugar', '')} ({formatted_fecha})", expanded=True):
-                            # Información básica de la Actividad
                             st.markdown(f"**Actividad :** {row.get('nombre_actividad', 'N/A')}")
-                            # Mostrar fechas: si son iguales -> una sola Fecha, si difieren -> Fecha Desde y Fecha Hasta
                             fd = format_date_str(row.get('fecha_desde'), _lang)
                             fh = format_date_str(row.get('fecha_hasta'), _lang)
                             if fd == fh:
@@ -966,13 +936,11 @@ if current_nav == t["nav_muestra"]:
                                 st.markdown(f"**Fecha Desde :** `{fd}` &nbsp;&nbsp; **Fecha Hasta :** `{fh}`")
                             st.markdown(f"**Lugar :** {row.get('lugar', 'N/A')}")
                             
-                            # Renderizado de Badges para Pastores a Cargo
                             st.markdown("**Pastores a cargo :**")
                             st.markdown(render_pastores_badges(row.get('pastores_cargo')), unsafe_allow_html=True)
                             
                             st.markdown(f"**Descripción :** {row.get('descripcion', 'Sin descripción')}")
                             
-                            # Renderizado de Badges para Ayudas Entregadas con colores alternados
                             st.markdown("**Ayudas Entregadas :**")
                             st.markdown(render_ayudas_badges(row.get('ayudas_entregadas')), unsafe_allow_html=True)
                             
@@ -982,11 +950,9 @@ if current_nav == t["nav_muestra"]:
                             if row.get("testimonios_texto") and str(row.get("testimonios_texto")).strip():
                                 st.markdown(f"**Testimonio / Historia de Vida :** *{row['testimonios_texto']}*")
 
-                            # Renderizado del mapa de ubicación para cada actividad
                             if row.get('ubicacion'):
                                 render_location_map(row.get('ubicacion'), title="Ubicación de la Jornada")
 
-                            # Métricas Particulares de la Actividad con st.metric
                             st.markdown("<br>", unsafe_allow_html=True)
                             st.markdown("##### 📊 Métricas de Alcance e Impacto")
                             
@@ -996,7 +962,6 @@ if current_nav == t["nav_muestra"]:
                             conv_val = int(row.get('conversiones', 0)) if pd.notna(row.get('conversiones')) else 0
                             disc_val = int(row.get('personas_discipulado', 0)) if pd.notna(row.get('personas_discipulado')) else 0
 
-                            # Primer grupo de métricas (Total Personas, Adultos / Niños, Familias)
                             m_alc1_c1, m_alc1_c2, m_alc1_c3 = st.columns(3)
                             m_alc1_c1.metric("👥 Total Personas", f"{adultos_val + ninos_val:,}")
                             m_alc1_c2.metric("🧑‍🤝‍🧑 Adultos / Niños", f"{adultos_val} / {ninos_val}")
@@ -1004,12 +969,10 @@ if current_nav == t["nav_muestra"]:
 
                             st.markdown("<br>", unsafe_allow_html=True)
 
-                            # Segundo grupo de métricas (Conversiones, En Discipulado)
                             m_alc2_c1, m_alc2_c2 = st.columns(2)
                             m_alc2_c1.metric("🙏 Conversiones", f"{conv_val:,}")
                             m_alc2_c2.metric("📖 En Discipulado", f"{disc_val:,}")
 
-                            # Métricas de Participación
                             st.markdown("##### 🤝 Métricas de Participación")
                             iglesias_val = int(row.get('iglesias_participantes', 0)) if pd.notna(row.get('iglesias_participantes')) else 0
                             pastores_val = int(row.get('pastores_lideres_involucrados', 0)) if pd.notna(row.get('pastores_lideres_involucrados')) else 0
@@ -1020,7 +983,6 @@ if current_nav == t["nav_muestra"]:
                             m_part_c2.metric("👤 Pastores/Líderes", f"{pastores_val}")
                             m_part_c3.metric("🙌 Voluntarios", f"{voluntarios_val}")
 
-                            # Tipos de Atención mostrados como etiquetas (badges)
                             st.markdown("**Tipos de Atención:**")
                             tp_atencion_raw = str(row.get('tipos_atencion', '')) if pd.notna(row.get('tipos_atencion')) else ''
                             if tp_atencion_raw.strip():
@@ -1036,7 +998,6 @@ if current_nav == t["nav_muestra"]:
                             st.markdown("---")
                             m_col1, m_col2 = st.columns(2)
                             
-                            # Sección Fotos
                             with m_col1:
                                 st.markdown("### 📷 Fotos")
                                 if foto_urls:
@@ -1048,7 +1009,6 @@ if current_nav == t["nav_muestra"]:
                                 else:
                                     st.caption("No hay fotos aprobadas para esta actividad.")
 
-                            # Sección Videos
                             with m_col2:
                                 st.markdown("### 🎬 Videos")
                                 if media_urls:
@@ -1094,7 +1054,6 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
     st.subheader(t["form_title"])
     u = st.session_state["user"]
 
-    # ---- 📍 GPS Helper ----
     with st.expander("📍 Obtener Coordenadas GPS Automáticamente", expanded=not bool(st.session_state.get('gps_coords'))):
         gps_col1, gps_col2, gps_col3 = st.columns([4, 1, 1])
         with gps_col1:
@@ -1210,7 +1169,6 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
             folder_name = f"pmis2026/{sanitize_folder_name(nombre_actividad)}_{fecha_desde}"
             is_auto_approved = (u["rol"] in ["editor", "admin"])
 
-            # Subida de fotos
             fotos_dicts = []
             if IS_CLOUDINARY_READY and files_fotos:
                 prog_fotos = st.progress(0, text="Subiendo fotos...")
@@ -1228,7 +1186,6 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
             
             final_fotos_json = json.dumps(fotos_dicts) if fotos_dicts else ""
 
-            # Subida de videos / audios
             media_dicts = []
             if IS_CLOUDINARY_READY and files_media:
                 prog_media = st.progress(0, text="Subiendo videos/audios...")
@@ -1276,21 +1233,10 @@ elif current_nav == t["nav_cargar"] and st.session_state["user"] is not None:
 # SECCIÓN 3: GESTIÓN DE ACTIVIDADES Y EDICIÓN DE TESTIMONIOS (EDITOR / ADMIN)
 # ---------------------------------------------------------
 elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None and st.session_state["user"]["rol"] in ["editor", "admin"]:
-    st.subheader(t["nav_gestionar"])
+    st.subheader(t["edit_activity_title"])
     df_all = fetch_data("SELECT * FROM actividades ORDER BY id DESC")
 
     if not df_all.empty:
-        df_all_disp = df_all.copy()
-        _lang = st.session_state.get("lang", "es")
-        if "fecha_desde" in df_all_disp.columns:
-            df_all_disp["fecha_desde"] = df_all_disp["fecha_desde"].apply(lambda v: format_date_str(v, _lang))
-        if "fecha_hasta" in df_all_disp.columns:
-            df_all_disp["fecha_hasta"] = df_all_disp["fecha_hasta"].apply(lambda v: format_date_str(v, _lang))
-        st.dataframe(df_all_disp, use_container_width=True)
-        
-        st.markdown("---")
-        st.markdown("### ⚙️ Modificación Completa y Edición de Testimonios / Actividades")
-        
         act_options = [f"ID #{row['id']} - {row['nombre_actividad']} ({format_date_range(row.get('fecha_desde'), row.get('fecha_hasta'), st.session_state.get('lang', 'es'))} | {row['lugar']})" for _, row in df_all.iterrows()]
         act_ids = df_all["id"].tolist()
         
@@ -1302,86 +1248,84 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
         sel_id = act_ids[sel_idx]
         row_sel = df_all[df_all["id"] == sel_id].iloc[0]
 
-        # Pestañas para organizar la edición del testimonio
         tab_edit_info, tab_edit_media, tab_danger = st.tabs([
-            "✏️ Editar Campos del Testimonio",
+            "✏️ Editar Campos del testimonio",
             "📸/🎬 Aprobar / Editar Multimedia",
             "🗑️ Estado General y Eliminar"
         ])
 
-        # TAB 1: FORMULARIO DE EDICIÓN DE CADA ELEMENTO DEL TESTIMONIO
+        # TAB 1: FORMULARIO DE EDICIÓN CON EXPANDERS REORGANIZADOS
         with tab_edit_info:
-            st.markdown(f"#### {t['edit_activity_title']} (ID #{sel_id})")
-            
             with st.form(f"form_edit_act_{sel_id}"):
-                col_e1, col_e2 = st.columns(2)
-                with col_e1:
-                    e_reportero = st.text_input(t["field_reportero"], value=str(row_sel.get("reportero", "")))
-                    e_nombre = st.text_input(t["field_actividad"], value=str(row_sel.get("nombre_actividad", "")))
-                    
-                    # Formatear fecha
-                    raw_fecha_desde = str(row_sel.get("fecha_desde", ""))
-                    raw_fecha_hasta = str(row_sel.get("fecha_hasta", ""))
-                    try:
-                        parsed_date_desde = datetime.datetime.strptime(raw_fecha_desde, "%Y-%m-%d").date()
-                    except Exception:
-                        parsed_date_desde = datetime.date.today()
-                    try:
-                        parsed_date_hasta = datetime.datetime.strptime(raw_fecha_hasta, "%Y-%m-%d").date()
-                    except Exception:
-                        parsed_date_hasta = parsed_date_desde
-                    
-                    e_fecha_desde = st.date_input(t["field_fecha_desde"], value=parsed_date_desde)
-                    e_fecha_hasta = st.date_input(t["field_fecha_hasta"], value=parsed_date_hasta)
-                    e_lugar = st.text_input(t["field_lugar"], value=str(row_sel.get("lugar", "")))
-                    e_ubicacion = st.text_input(t["field_ubicacion"], value=str(row_sel.get("ubicacion", "")))
+                # Expander 1: Editar Contenido
+                with st.expander("📝 Editar Contenido", expanded=True):
+                    col_e1, col_e2 = st.columns(2)
+                    with col_e1:
+                        e_reportero = st.text_input(t["field_reportero"], value=str(row_sel.get("reportero", "")))
+                        e_nombre = st.text_input(t["field_actividad"], value=str(row_sel.get("nombre_actividad", "")))
+                        
+                        raw_fecha_desde = str(row_sel.get("fecha_desde", ""))
+                        raw_fecha_hasta = str(row_sel.get("fecha_hasta", ""))
+                        try:
+                            parsed_date_desde = datetime.datetime.strptime(raw_fecha_desde, "%Y-%m-%d").date()
+                        except Exception:
+                            parsed_date_desde = datetime.date.today()
+                        try:
+                            parsed_date_hasta = datetime.datetime.strptime(raw_fecha_hasta, "%Y-%m-%d").date()
+                        except Exception:
+                            parsed_date_hasta = parsed_date_desde
+                        
+                        e_fecha_desde = st.date_input(t["field_fecha_desde"], value=parsed_date_desde)
+                        e_fecha_hasta = st.date_input(t["field_fecha_hasta"], value=parsed_date_hasta)
+                        e_lugar = st.text_input(t["field_lugar"], value=str(row_sel.get("lugar", "")))
+                        e_ubicacion = st.text_input(t["field_ubicacion"], value=str(row_sel.get("ubicacion", "")))
 
-                    if e_ubicacion:
-                        render_location_map(e_ubicacion, title="Vista Previa de Ubicación en Editor")
+                        if e_ubicacion:
+                            render_location_map(e_ubicacion, title="Vista Previa de Ubicación en Editor")
 
-                with col_e2:
-                    e_pastores = st.text_input(t["field_pastores"], value=str(row_sel.get("pastores_cargo", "")))
-                    e_desc = st.text_area(t["field_desc"], value=str(row_sel.get("descripcion", "")), height=140)
+                    with col_e2:
+                        e_pastores = st.text_input(t["field_pastores"], value=str(row_sel.get("pastores_cargo", "")))
+                        e_desc = st.text_area(t["field_desc"], value=str(row_sel.get("descripcion", "")), height=140)
 
-                st.markdown("##### 📊 Métricas de Alcance")
-                c_ea1, c_ea2, c_ea3, c_ea4, c_ea5 = st.columns(5)
-                e_conversiones = c_ea1.number_input(t["kpi_conversiones"], min_value=0, value=int(row_sel.get("conversiones", 0) or 0))
-                e_discipulado = c_ea2.number_input(t["kpi_discipulado"], min_value=0, value=int(row_sel.get("personas_discipulado", 0) or 0))
-                e_adultos = c_ea3.number_input(t["kpi_adultos"], min_value=0, value=int(row_sel.get("adultos_atendidos", 0) or 0))
-                e_ninos = c_ea4.number_input(t["kpi_ninos"], min_value=0, value=int(row_sel.get("ninos_atendidos", 0) or 0))
-                e_familias = c_ea5.number_input(t["kpi_familias"], min_value=0, value=int(row_sel.get("familias_atendidas", 0) or 0))
+                    curr_estado = str(row_sel.get("estado", "aprobado")).lower()
+                    idx_est = 0
+                    if curr_estado == "pendiente": idx_est = 1
+                    elif curr_estado == "borrador": idx_est = 2
+                    e_estado = st.selectbox("Estado General de la Actividad", ["aprobado", "pendiente", "borrador"], index=idx_est)
 
-                # Multiselect de tipos de atención
-                opts_atencion = ["Consejería", "Acompañamiento Emocional", "Ropa / Calzado", "Comida / Alimentos", "Apoyo Médico", "Kits de Aseo", "Discipulado Biblico"]
-                curr_at = [x.strip() for x in str(row_sel.get("tipos_atencion", "")).split(",") if x.strip()]
-                default_at = [x for x in curr_at if x in opts_atencion]
+                # Expander 2: Métricas de Alcance
+                with st.expander("📊 Métricas de Alcance", expanded=False):
+                    c_ea1, c_ea2, c_ea3, c_ea4, c_ea5 = st.columns(5)
+                    e_conversiones = c_ea1.number_input(t["kpi_conversiones"], min_value=0, value=int(row_sel.get("conversiones", 0) or 0))
+                    e_discipulado = c_ea2.number_input(t["kpi_discipulado"], min_value=0, value=int(row_sel.get("personas_discipulado", 0) or 0))
+                    e_adultos = c_ea3.number_input(t["kpi_adultos"], min_value=0, value=int(row_sel.get("adultos_atendidos", 0) or 0))
+                    e_ninos = c_ea4.number_input(t["kpi_ninos"], min_value=0, value=int(row_sel.get("ninos_atendidos", 0) or 0))
+                    e_familias = c_ea5.number_input(t["kpi_familias"], min_value=0, value=int(row_sel.get("familias_atendidas", 0) or 0))
 
-                e_atencion_sel = st.multiselect(
-                    t["field_atencion"],
-                    options=opts_atencion,
-                    default=default_at
-                )
-                e_sectores = st.text_input(t["field_sectores"], value=str(row_sel.get("sectores_municipios", "")))
-                e_ayudas = st.text_area(t["field_ayudas"], value=str(row_sel.get("ayudas_entregadas", "")), height=100)
+                    opts_atencion = ["Consejería", "Acompañamiento Emocional", "Ropa / Calzado", "Comida / Alimentos", "Apoyo Médico", "Kits de Aseo", "Discipulado Biblico"]
+                    curr_at = [x.strip() for x in str(row_sel.get("tipos_atencion", "")).split(",") if x.strip()]
+                    default_at = [x for x in curr_at if x in opts_atencion]
 
-                st.markdown("##### 🤝 Métricas de Participación")
-                c_ep1, c_ep2, c_ep3 = st.columns(3)
-                e_iglesias = c_ep1.number_input(t["kpi_iglesias"], min_value=0, value=int(row_sel.get("iglesias_participantes", 0) or 0))
-                e_pastores_num = c_ep2.number_input(t["kpi_pastores"], min_value=0, value=int(row_sel.get("pastores_lideres_involucrados", 0) or 0))
-                e_voluntarios = c_ep3.number_input(t["kpi_voluntarios"], min_value=0, value=int(row_sel.get("familias_creyentes_preparacion", 0) or 0))
-                e_denominaciones = st.text_input(t["field_denominaciones"], value=str(row_sel.get("denominaciones", "")))
+                    e_atencion_sel = st.multiselect(
+                        t["field_atencion"],
+                        options=opts_atencion,
+                        default=default_at
+                    )
+                    e_sectores = st.text_input(t["field_sectores"], value=str(row_sel.get("sectores_municipios", "")))
+                    e_ayudas = st.text_area(t["field_ayudas"], value=str(row_sel.get("ayudas_entregadas", "")), height=100)
 
-                st.markdown("##### 💬 Testimonio e Historias de Vida")
-                e_testimonios_texto = st.text_area(t["field_testimonios_texto"], value=str(row_sel.get("testimonios_texto", "")), height=120)
-                e_otro = st.text_area(t["field_otro"], value=str(row_sel.get("otro", "")), height=80)
+                # Expander 3: Métricas de Participación
+                with st.expander("🤝 Métricas de Participación", expanded=False):
+                    c_ep1, c_ep2, c_ep3 = st.columns(3)
+                    e_iglesias = c_ep1.number_input(t["kpi_iglesias"], min_value=0, value=int(row_sel.get("iglesias_participantes", 0) or 0))
+                    e_pastores_num = c_ep2.number_input(t["kpi_pastores"], min_value=0, value=int(row_sel.get("pastores_lideres_involucrados", 0) or 0))
+                    e_voluntarios = c_ep3.number_input(t["kpi_voluntarios"], min_value=0, value=int(row_sel.get("familias_creyentes_preparacion", 0) or 0))
+                    e_denominaciones = st.text_input(t["field_denominaciones"], value=str(row_sel.get("denominaciones", "")))
 
-                # Estado
-                curr_estado = str(row_sel.get("estado", "aprobado")).lower()
-                idx_est = 0
-                if curr_estado == "pendiente": idx_est = 1
-                elif curr_estado == "borrador": idx_est = 2
-
-                e_estado = st.selectbox("Estado General de la Actividad", ["aprobado", "pendiente", "borrador"], index=idx_est)
+                # Expander 4: Testimonios
+                with st.expander("💬 Testimonios", expanded=False):
+                    e_testimonios_texto = st.text_area(t["field_testimonios_texto"], value=str(row_sel.get("testimonios_texto", "")), height=120)
+                    e_otro = st.text_area(t["field_otro"], value=str(row_sel.get("otro", "")), height=80)
 
                 btn_save_edits = st.form_submit_button(t["save_edits_btn"], use_container_width=True)
 
@@ -1428,183 +1372,231 @@ elif current_nav == t["nav_gestionar"] and st.session_state["user"] is not None 
                     else:
                         st.error("Error al guardar las modificaciones en la base de datos.")
 
-        # TAB 2: APROBACIÓN / EDICIÓN MULTIMEDIA
-        #
+        # TAB 2: APROBACIÓN / EDITAR MULTIMEDIA ORGANIZADO EN EXPANDERS
         with tab_edit_media:
-            st.subheader(t["media_approval_title"])
-            st.caption(f"Gestión de visibilidad pública de archivos multimedia para la Actividad #{sel_id}: **{row_sel['nombre_actividad']}**")
-
             list_fotos = parse_media_urls(row_sel.get("fotos_url"), only_approved=False)
             list_media = parse_media_urls(row_sel.get("videos_audios_url"), only_approved=False)
 
-            if not list_fotos and not list_media:
-                st.info("Esta actividad no posee archivos multimedia registrados.")
-            else:
-                btn_col1, btn_col2, _ = st.columns([1, 1, 2])
-                if btn_col1.button(t["approve_all"], key="btn_app_all"):
-                    for f in list_fotos: f["aprobado"] = True
-                    for m in list_media: m["aprobado"] = True
-                    execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [json.dumps(list_fotos), json.dumps(list_media), sel_id])
-                    st.success("¡Todos los archivos multimedia han sido APROBADOS!")
-                    st.rerun()
-
-                if btn_col2.button(t["disapprove_all"], key="btn_dis_all"):
-                    for f in list_fotos: f["aprobado"] = False
-                    for m in list_media: m["aprobado"] = False
-                    execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [json.dumps(list_fotos), json.dumps(list_media), sel_id])
-                    st.warning("¡Todos los archivos multimedia han sido DESAPROBADOS!")
-                    st.rerun()
-
-                st.markdown("<br>", unsafe_allow_html=True)
-
-                updated_fotos = []
-                updated_media = []
-
-                if list_fotos:
-                    st.markdown("#### 🖼️ Fotos e Imágenes")
-                    cols_f = st.columns(min(len(list_fotos), 3))
-                    for i, item in enumerate(list_fotos):
-                        with cols_f[i % 3]:
-                            u_url = item["url"]
-                            st.image(u_url, use_container_width=True)
-                            is_app = st.checkbox(
-                                f"Aprobar Foto #{i+1}",
-                                value=item["aprobado"],
-                                key=f"chk_foto_{sel_id}_{i}"
-                            )
-                            updated_fotos.append({"url": u_url, "aprobado": is_app})
-
-                st.markdown("<br>", unsafe_allow_html=True)
-
-                if list_media:
-                    st.markdown("#### 🎬 Videos y Audios")
-                    cols_m = st.columns(min(len(list_media), 2))
-                    for j, item in enumerate(list_media):
-                        with cols_m[j % 2]:
-                            u_url = item["url"]
-                            if u_url.endswith((".mp4", ".mov", ".webm")):
-                                st.video(u_url)
-                            elif u_url.endswith((".mp3", ".wav", ".ogg", ".m4a")):
-                                st.audio(u_url)
-                            else:
-                                st.write(f"📁 [Ver Archivo]({u_url})")
-
-                            is_app = st.checkbox(
-                                f"Aprobar Multimedia #{j+1}",
-                                value=item["aprobado"],
-                                key=f"chk_media_{sel_id}_{j}"
-                            )
-                            updated_media.append({"url": u_url, "aprobado": is_app})
-
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button(t["save_media_status"], type="primary", use_container_width=True):
-                    str_fotos = json.dumps(updated_fotos)
-                    str_media = json.dumps(updated_media)
-                    execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [str_fotos, str_media, sel_id])
-                    st.success(t["media_updated_success"])
-                    st.rerun()
-
-            st.markdown("---")
-            st.markdown(f"### {t['upload_new_media_title']}")
-            st.caption("💡 Carga nuevos archivos directos o enlaces externos (fotos, videos, audios) para añadirlos a esta actividad.")
-
-            with st.form(key=f"form_upload_extra_media_{sel_id}"):
-                col_m1_edit, col_m2_edit = st.columns(2)
-                with col_m1_edit:
-                    st.write("**🖼️ Agregar Fotos** (múltiples)")
-                    new_files_fotos = st.file_uploader(
-                        t["upload_direct"] + " (Fotos)",
-                        type=["png", "jpg", "jpeg", "webp"],
-                        accept_multiple_files=True,
-                        key=f"edit_uploader_fotos_{sel_id}"
-                    )
-                    new_url_fotos_ext = st.text_input(t["url_external"] + " (Fotos)", key=f"edit_url_fotos_{sel_id}")
-
-                with col_m2_edit:
-                    st.write("**🎬 Agregar Videos / Audios** (múltiples)")
-                    new_files_media = st.file_uploader(
-                        t["upload_direct"] + " (Video/Audio)",
-                        type=["mp4", "mp3", "wav", "mov", "m4a", "ogg", "webm"],
-                        accept_multiple_files=True,
-                        key=f"edit_uploader_media_{sel_id}"
-                    )
-                    new_url_media_ext = st.text_input(t["url_external"] + " (Videos/Audios)", key=f"edit_url_media_{sel_id}")
-
-                auto_approve_new = st.checkbox("✅ Aprobar automáticamente los nuevos archivos subidos", value=True, key=f"chk_auto_app_{sel_id}")
-
-                btn_upload_extra = st.form_submit_button(t["upload_new_media_btn"], use_container_width=True)
-
-                if btn_upload_extra:
-                    act_fecha = row_sel.get('fecha_desde') or row_sel.get('fecha') or ''
-                    folder_name = f"pmis2026/{sanitize_folder_name(str(row_sel['nombre_actividad']))}_{act_fecha}"
-                    added_count = 0
-
-                    # Cargar fotos adicionales a Cloudinary
-                    if IS_CLOUDINARY_READY and new_files_fotos:
-                        prog_f = st.progress(0, text="Subiendo nuevas fotos...")
-                        for i, f in enumerate(new_files_fotos):
-                            url = upload_media_file(f, folder=folder_name)
-                            if url:
-                                list_fotos.append({"url": url, "aprobado": auto_approve_new})
-                                added_count += 1
-                            prog_f.progress((i + 1) / len(new_files_fotos), text=f"Foto {i+1}/{len(new_files_fotos)} subida...")
-                        prog_f.empty()
-                    elif new_files_fotos and not IS_CLOUDINARY_READY:
-                        st.warning("⚠️ Cloudinary no está configurado. Las fotos no se subieron.")
-
-                    if new_url_fotos_ext.strip():
-                        list_fotos.append({"url": new_url_fotos_ext.strip(), "aprobado": auto_approve_new})
-                        added_count += 1
-
-                    # Cargar videos/audios adicionales a Cloudinary
-                    if IS_CLOUDINARY_READY and new_files_media:
-                        prog_m = st.progress(0, text="Subiendo nuevos videos/audios...")
-                        for i, f in enumerate(new_files_media):
-                            url = upload_media_file(f, folder=folder_name)
-                            if url:
-                                list_media.append({"url": url, "aprobado": auto_approve_new})
-                                added_count += 1
-                            prog_m.progress((i + 1) / len(new_files_media), text=f"Archivo {i+1}/{len(new_files_media)} subido...")
-                        prog_m.empty()
-                    elif new_files_media and not IS_CLOUDINARY_READY:
-                        st.warning("⚠️ Cloudinary no está configurado. Los videos/audios no se subieron.")
-
-                    if new_url_media_ext.strip():
-                        list_media.append({"url": new_url_media_ext.strip(), "aprobado": auto_approve_new})
-                        added_count += 1
-
-                    if added_count > 0:
-                        execute_query(
-                            "UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?",
-                            [json.dumps(list_fotos), json.dumps(list_media), sel_id]
-                        )
-                        st.success(f"{t['upload_new_media_success']} ({added_count} elemento(s) agregado(s))")
+            # Expander 1: Aprobación de Multimedia
+            with st.expander("📸/🎬 Aprobación de Multimedia", expanded=True):
+                if not list_fotos and not list_media:
+                    st.info("Esta actividad no posee archivos multimedia registrados.")
+                else:
+                    btn_col1, btn_col2, _ = st.columns([1, 1, 2])
+                    if btn_col1.button(t["approve_all"], key="btn_app_all"):
+                        for f in list_fotos: f["aprobado"] = True
+                        for m in list_media: m["aprobado"] = True
+                        execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [json.dumps(list_fotos), json.dumps(list_media), sel_id])
+                        st.success("¡Todos los archivos multimedia han sido APROBADOS!")
                         st.rerun()
-                    else:
-                        st.warning("No se seleccionó ningún archivo ni se ingresó ninguna URL.")
 
-        
+                    if btn_col2.button(t["disapprove_all"], key="btn_dis_all"):
+                        for f in list_fotos: f["aprobado"] = False
+                        for m in list_media: m["aprobado"] = False
+                        execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [json.dumps(list_fotos), json.dumps(list_media), sel_id])
+                        st.warning("¡Todos los archivos multimedia han sido DESAPROBADOS!")
+                        st.rerun()
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+
+                    updated_fotos = []
+                    updated_media = []
+
+                    if list_fotos:
+                        st.markdown("#### 🖼️ Fotos e Imágenes")
+                        cols_f = st.columns(min(len(list_fotos), 3))
+                        for i, item in enumerate(list_fotos):
+                            with cols_f[i % 3]:
+                                u_url = item["url"]
+                                st.image(u_url, use_container_width=True)
+                                is_app = st.checkbox(
+                                    f"Aprobar Foto #{i+1}",
+                                    value=item["aprobado"],
+                                    key=f"chk_foto_{sel_id}_{i}"
+                                )
+                                updated_fotos.append({"url": u_url, "aprobado": is_app})
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+
+                    if list_media:
+                        st.markdown("#### 🎬 Videos y Audios")
+                        cols_m = st.columns(min(len(list_media), 2))
+                        for j, item in enumerate(list_media):
+                            with cols_m[j % 2]:
+                                u_url = item["url"]
+                                if u_url.endswith((".mp4", ".mov", ".webm")):
+                                    st.video(u_url)
+                                elif u_url.endswith((".mp3", ".wav", ".ogg", ".m4a")):
+                                    st.audio(u_url)
+                                else:
+                                    st.write(f"📁 [Ver Archivo]({u_url})")
+
+                                is_app = st.checkbox(
+                                    f"Aprobar Multimedia #{j+1}",
+                                    value=item["aprobado"],
+                                    key=f"chk_media_{sel_id}_{j}"
+                                )
+                                updated_media.append({"url": u_url, "aprobado": is_app})
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if st.button(t["save_media_status"], type="primary", use_container_width=True):
+                        str_fotos = json.dumps(updated_fotos)
+                        str_media = json.dumps(updated_media)
+                        execute_query("UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?", [str_fotos, str_media, sel_id])
+                        st.success(t["media_updated_success"])
+                        st.rerun()
+
+            # Expander 2: Eliminación de Multimedia
+            with st.expander("🗑️ Eliminación de Multimedia", expanded=False):
+                st.caption("⚠️ Aquí se listan únicamente los archivos **no aprobados**. Puedes seleccionar los que desees eliminar permanentemente de Cloudinary y de la base de datos.")
+
+                unapproved_fotos = [item for item in list_fotos if not item.get("aprobado", False)]
+                unapproved_media = [item for item in list_media if not item.get("aprobado", False)]
+
+                if not unapproved_fotos and not unapproved_media:
+                    st.info("No hay archivos multimedia pendientes de aprobación o desaprobados para eliminar.")
+                else:
+                    to_delete_fotos = []
+                    to_delete_media = []
+
+                    if unapproved_fotos:
+                        st.markdown("##### 🖼️ Fotos No Aprobadas")
+                        cols_df = st.columns(min(len(unapproved_fotos), 3))
+                        for idx_uf, item in enumerate(unapproved_fotos):
+                            with cols_df[idx_uf % 3]:
+                                u_url = item["url"]
+                                st.image(u_url, use_container_width=True)
+                                if st.checkbox(f"Eliminar Foto #{idx_uf+1}", key=f"del_chk_foto_{sel_id}_{idx_uf}"):
+                                    to_delete_fotos.append(u_url)
+
+                    if unapproved_media:
+                        st.markdown("##### 🎬 Videos / Audios No Aprobados")
+                        cols_dm = st.columns(min(len(unapproved_media), 2))
+                        for idx_um, item in enumerate(unapproved_media):
+                            with cols_dm[idx_um % 2]:
+                                u_url = item["url"]
+                                if u_url.endswith((".mp4", ".mov", ".webm")):
+                                    st.video(u_url)
+                                elif u_url.endswith((".mp3", ".wav", ".ogg", ".m4a")):
+                                    st.audio(u_url)
+                                else:
+                                    st.write(f"📁 [Ver Archivo]({u_url})")
+                                if st.checkbox(f"Eliminar Multimedia #{idx_um+1}", key=f"del_chk_media_{sel_id}_{idx_um}"):
+                                    to_delete_media.append(u_url)
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if st.button(t["delete_media_btn"], type="primary", key=f"btn_delete_unapproved_{sel_id}"):
+                        if not to_delete_fotos and not to_delete_media:
+                            st.warning("No has marcado ningún archivo para eliminar.")
+                        else:
+                            deleted_count = 0
+                            for url_del in to_delete_fotos + to_delete_media:
+                                delete_cloudinary_media(url_del)
+                                deleted_count += 1
+
+                            new_fotos = [item for item in list_fotos if item["url"] not in to_delete_fotos]
+                            new_media = [item for item in list_media if item["url"] not in to_delete_media]
+
+                            execute_query(
+                                "UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?",
+                                [json.dumps(new_fotos), json.dumps(new_media), sel_id]
+                            )
+                            st.success(f"¡{deleted_count} archivo(s) eliminado(s) exitosamente de Cloudinary y la base de datos!")
+                            st.rerun()
+
+            # Expander 3: Subir Nuevos Archivos Multimedia
+            with st.expander("📤 Subir Nuevos", expanded=False):
+                st.caption("💡 Carga nuevos archivos directos o enlaces externos (fotos, videos, audios) para añadirlos a esta actividad.")
+
+                with st.form(key=f"form_upload_extra_media_{sel_id}"):
+                    col_m1_edit, col_m2_edit = st.columns(2)
+                    with col_m1_edit:
+                        st.write("**🖼️ Agregar Fotos** (múltiples)")
+                        new_files_fotos = st.file_uploader(
+                            t["upload_direct"] + " (Fotos)",
+                            type=["png", "jpg", "jpeg", "webp"],
+                            accept_multiple_files=True,
+                            key=f"edit_uploader_fotos_{sel_id}"
+                        )
+                        new_url_fotos_ext = st.text_input(t["url_external"] + " (Fotos)", key=f"edit_url_fotos_{sel_id}")
+
+                    with col_m2_edit:
+                        st.write("**🎬 Agregar Videos / Audios** (múltiples)")
+                        new_files_media = st.file_uploader(
+                            t["upload_direct"] + " (Video/Audio)",
+                            type=["mp4", "mp3", "wav", "mov", "m4a", "ogg", "webm"],
+                            accept_multiple_files=True,
+                            key=f"edit_uploader_media_{sel_id}"
+                        )
+                        new_url_media_ext = st.text_input(t["url_external"] + " (Videos/Audios)", key=f"edit_url_media_{sel_id}")
+
+                    auto_approve_new = st.checkbox("✅ Aprobar automáticamente los nuevos archivos subidos", value=True, key=f"chk_auto_app_{sel_id}")
+
+                    btn_upload_extra = st.form_submit_button(t["upload_new_media_btn"], use_container_width=True)
+
+                    if btn_upload_extra:
+                        act_fecha = row_sel.get('fecha_desde') or row_sel.get('fecha') or ''
+                        folder_name = f"pmis2026/{sanitize_folder_name(str(row_sel['nombre_actividad']))}_{act_fecha}"
+                        added_count = 0
+
+                        if IS_CLOUDINARY_READY and new_files_fotos:
+                            prog_f = st.progress(0, text="Subiendo nuevas fotos...")
+                            for i, f in enumerate(new_files_fotos):
+                                url = upload_media_file(f, folder=folder_name)
+                                if url:
+                                    list_fotos.append({"url": url, "aprobado": auto_approve_new})
+                                    added_count += 1
+                                prog_f.progress((i + 1) / len(new_files_fotos), text=f"Foto {i+1}/{len(new_files_fotos)} subida...")
+                            prog_f.empty()
+                        elif new_files_fotos and not IS_CLOUDINARY_READY:
+                            st.warning("⚠️ Cloudinary no está configurado. Las fotos no se subieron.")
+
+                        if new_url_fotos_ext.strip():
+                            list_fotos.append({"url": new_url_fotos_ext.strip(), "aprobado": auto_approve_new})
+                            added_count += 1
+
+                        if IS_CLOUDINARY_READY and new_files_media:
+                            prog_m = st.progress(0, text="Subiendo nuevos videos/audios...")
+                            for i, f in enumerate(new_files_media):
+                                url = upload_media_file(f, folder=folder_name)
+                                if url:
+                                    list_media.append({"url": url, "aprobado": auto_approve_new})
+                                    added_count += 1
+                                prog_m.progress((i + 1) / len(new_files_media), text=f"Archivo {i+1}/{len(new_files_media)} subido...")
+                            prog_m.empty()
+                        elif new_files_media and not IS_CLOUDINARY_READY:
+                            st.warning("⚠️ Cloudinary no está configurado. Los videos/audios no se subieron.")
+
+                        if new_url_media_ext.strip():
+                            list_media.append({"url": new_url_media_ext.strip(), "aprobado": auto_approve_new})
+                            added_count += 1
+
+                        if added_count > 0:
+                            execute_query(
+                                "UPDATE actividades SET fotos_url = ?, videos_audios_url = ? WHERE id = ?",
+                                [json.dumps(list_fotos), json.dumps(list_media), sel_id]
+                            )
+                            st.success(f"{t['upload_new_media_success']} ({added_count} elemento(s) agregado(s))")
+                            st.rerun()
+                        else:
+                            st.warning("No se seleccionó ningún archivo ni se ingresó ninguna URL.")
 
         # TAB 3: ESTADO RÁPIDO Y ELIMINACIÓN
         with tab_danger:
-            st.markdown("### Acciones Rápidas")
-            col_ed1, col_ed2 = st.columns(2)
-            with col_ed1:
-                idx_est = 0
-                if row_sel["estado"] == "pendiente": idx_est = 1
-                elif row_sel["estado"] == "borrador": idx_est = 2
+            st.markdown("### ⚠️ Eliminar Actividad Completa")
+            st.caption("Esta acción eliminará permanentemente la actividad y todos sus registros asociados de la base de datos.")
+            if st.button("🗑️ Eliminar Actividad Completa de la Base de Datos", type="primary", key=f"btn_del_act_{sel_id}"):
+                execute_query("DELETE FROM actividades WHERE id = ?", [sel_id])
+                st.success("Actividad eliminada con éxito.")
+                st.rerun()
 
-                nuevo_estado = st.selectbox("Cambiar Estado General Rápidamente", ["aprobado", "pendiente", "borrador"], index=idx_est, key="quick_estado_sel")
-                if st.button("Actualizar Estado"):
-                    execute_query("UPDATE actividades SET estado = ? WHERE id = ?", [nuevo_estado, sel_id])
-                    st.success(f"Estado de la actividad #{sel_id} actualizado a '{nuevo_estado}'.")
-                    st.rerun()
-
-            with col_ed2:
-                st.write("<br>", unsafe_allow_html=True)
-                if st.button("🗑️ Eliminar Actividad Completa", type="primary"):
-                    execute_query("DELETE FROM actividades WHERE id = ?", [sel_id])
-                    st.warning(f"Actividad #{sel_id} eliminada permanentemente.")
-                    st.rerun()
-    else:
-        st.info("No hay actividades registradas en la base de datos.")
+        # DATAFRAME DE ACTIVIDADES (MOSTRADO AL FINAL DE LA SECCIÓN)
+        st.markdown("---")
+        st.markdown(f"### {t['dataframe_title']}")
+        df_all_disp = df_all.copy()
+        _lang = st.session_state.get("lang", "es")
+        if "fecha_desde" in df_all_disp.columns:
+            df_all_disp["fecha_desde"] = df_all_disp["fecha_desde"].apply(lambda v: format_date_str(v, _lang))
+        if "fecha_hasta" in df_all_disp.columns:
+            df_all_disp["fecha_hasta"] = df_all_disp["fecha_hasta"].apply(lambda v: format_date_str(v, _lang))
+        st.dataframe(df_all_disp, use_container_width=True)
